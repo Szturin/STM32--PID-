@@ -9,94 +9,83 @@
 #include <MOTOR.H>
 #include <Serial.H>
 #include <stdio.h>
-
+#include <MPU6050.H>
+#include <inv_mpu.h>
+#include <MPU6050_DMP.h>
+#include <PID.h>
 //定时器定时速度过慢？？？
 //此工程运行正常
 
 float PWM1,PWM2;
 float PWM_F=0;
 float PWM_ALL;
+
+float PWM_V;//直立环PWM
 float Speed;
 float measure;
 float calcu;
-
+unsigned char Motor_Flag=0;
 unsigned int number;
 unsigned char KeyNum;
 
-float Kp=1.80,Ki=0.18,Kd=0;
-float Error;
-float Error_old;
-float Error_difference;
-long int Error_sum;
+float Pitch,Roll,Yaw;
+int16_t gx,gy,gz,ax,ay,az;
+u8 MPU_Get_Gyroscope(short *gx,short *gy,short *gz);
+u8 MPU_Get_Accelerometer(short *ax,short *ay,short *az);
 
-void I_amplitude_limiting(int number)
-{
-	if(Error_sum>number)
-	{
-		Error_sum=number;
-	}
-}
+unsigned char PWM_Flag=0;
 
-void PWM_amplitude_limiting(float a)
-{
-	if(PWM_ALL >=5000 )
-	{
-		PWM_ALL = 5000;
-	}
-	else if(PWM_ALL<= - 5000)
-	{
-		PWM_ALL = -5000;
-	}
-}
-//PID控制系统:P、I、D共同作用
-//measure,calcu:系统的输入
-int PID_control(float measure,float calcu)
-{
-	Error = calcu - measure;//误差值
-
-	Error_sum += Error;//误差累加
-	I_amplitude_limiting(13800);//限幅函数
-
-	Error_difference = Error- Error_old;//误差变化率(近似于对时间的微分)
-	
-	Error_old = Error;
-
-	return(Kp*Error+Kd*Error_difference+Ki*Error_sum);//PID控制器响应结果
-}
-
-
+extern uint32_t num_conuter;
+extern uint32_t num_counter_pwm;
 int main(void)
 {
+	int result;
 	OLED_Init();
-	OLED_ShowString(1,1,"Speed:");
-	OLED_ShowString(3,1,"PWM1:");
-	OLED_ShowString(4,1,"PWM2:");
+	MPU6050_Init();
+	result = mpu_dmp_init();
+	
+	OLED_ShowString(2,1,"P:");
+	OLED_ShowString(3,1,"R:");
+	OLED_ShowString(4,1,"Y:");
+	OLED_ShowString(1,1,"Result:");
+	Vertical_PID_Init();
 	USART3_Init();
 	Encoder_Init();
 	Motor_PWM_Init();
 	TIM1_Init();
-	
-	PWM1=1000;PWM2=-1000;
-	Motor_SpeedSet((int16_t)PWM1,(int16_t)PWM2);
+	PWM1=2000;PWM2=-2000;
 	
 	while(1)
 	{
-		OLED_ShowNum(2,1,number,5);
-		OLED_ShowNum(1,7,Speed,5);
-		OLED_ShowSignedNum(3,6,(int)PWM1,5);
-		OLED_ShowSignedNum(4,6,(int)PWM2,5);
-		KeyNum=Key_GetNum();
+		//
+		//MPU6050_GetData_T(&ax,&ay,&az,&gx,&gy,&gz);	
+		OLED_ShowSignedNum(1,6,result,2);
+		OLED_ShowSignedNum(2,4,Pitch,3);OLED_ShowSignedNum(1,8,num_conuter,4);
+		OLED_ShowSignedNum(3,4,Roll,3); OLED_ShowSignedNum(3,8,PWM_V,4);
+		OLED_ShowSignedNum(4,4,Yaw,3);	
+		
+		if(Roll>= 30 | Roll <=-30)
+		{		
+			Motor_SpeedSet_Vertical(0);
+			Motor_Flag=1;
+		}
+		//PWM_V=Vertical_PID(Roll);
+		//Motor_SpeedSet((int16_t)PWM_V,(int16_t)PWM_V);		
 	}
+	
 }
 
 void TIM1_UP_IRQHandler(void)   //TIM1中断
 {
 	if(TIM_GetITStatus(TIM1, TIM_IT_Update) == SET) //检查指定的TIM1中断发生与否:TIM1 中断源 
 	{
-		printf("%f,%f,%f\n",Speed,calcu,Error_difference);
-		Speed=Encoder_GetSpeed();
-		measure=Speed;
-		number++;
+		
+		PWM_V=Vertical_PID(Roll);	
+		if(Motor_Flag==0 && (mpu_dmp_get_data(&Pitch,&Roll,&Yaw) ==0))
+		{
+			Motor_SpeedSet_Vertical((int16_t)PWM_V);
+		}
+		//printf("%f\r\n",Roll);
 		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);  //清除TIMx的中断待处理位:TIM1 中断源 	
 	}
 }

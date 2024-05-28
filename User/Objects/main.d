@@ -37,3 +37,7 @@
 .\objects\main.o: ..\Driver\PWM.H
 .\objects\main.o: ..\Driver\Serial.H
 .\objects\main.o: D:\keil5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\main.o: ..\Driver\MPU6050\MPU6050.H
+.\objects\main.o: ..\Driver\MPU6050_DMP\inv_mpu.h
+.\objects\main.o: ..\Driver\MPU6050_DMP\MPU6050_DMP.h
+.\objects\main.o: ..\Driver\PID.h

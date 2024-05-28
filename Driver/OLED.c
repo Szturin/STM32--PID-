@@ -2,8 +2,8 @@
 #include "OLED_Font.h"
 
 /*引脚配置*/
-#define OLED_W_SCL(x)		GPIO_WriteBit(GPIOB, GPIO_Pin_8, (BitAction)(x))
-#define OLED_W_SDA(x)		GPIO_WriteBit(GPIOB, GPIO_Pin_9, (BitAction)(x))
+#define OLED_W_SCL(x)		GPIO_WriteBit(GPIOB, GPIO_Pin_0, (BitAction)(x))
+#define OLED_W_SDA(x)		GPIO_WriteBit(GPIOB, GPIO_Pin_1, (BitAction)(x))
 
 /*引脚初始化*/
 void OLED_I2C_Init(void)
@@ -13,9 +13,9 @@ void OLED_I2C_Init(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
  	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
  	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	
 	OLED_W_SCL(1);
@@ -318,4 +318,76 @@ void OLED_Init(void)
 	OLED_WriteCommand(0xAF);	//开启显示
 		
 	OLED_Clear();				//OLED清屏
+}
+uint8_t OLED_DisplayBuf[8][128];
+/**
+  * 函    数：将OLED显存数组部分清零
+  * 参    数：X 指定区域左上角的横坐标，范围：0~127
+  * 参    数：Y 指定区域左上角的纵坐标，范围：0~63
+  * 参    数：Width 指定区域的宽度，范围：0~128
+  * 参    数：Height 指定区域的高度，范围：0~64
+  * 返 回 值：无
+  * 说    明：调用此函数后，要想真正地呈现在屏幕上，还需调用更新函数
+  */
+void OLED_ClearArea(uint8_t X, uint8_t Y, uint8_t Width, uint8_t Height)
+{
+	uint8_t i, j;
+	
+	/*参数检查，保证指定区域不会超出屏幕范围*/
+	if (X > 127) {return;}
+	if (Y > 63) {return;}
+	if (X + Width > 128) {Width = 128 - X;}
+	if (Y + Height > 64) {Height = 64 - Y;}
+	
+	for (j = Y; j < Y + Height; j ++)		//遍历指定页
+	{
+		for (i = X; i < X + Width; i ++)	//遍历指定列
+		{
+			OLED_DisplayBuf[j / 8][i] &= ~(0x01 << (j % 8));	//将显存数组指定数据清零
+		}
+	}
+}
+/**
+  * 函    数：OLED显示图像
+  * 参    数：X 指定图像左上角的横坐标，范围：0~127
+  * 参    数：Y 指定图像左上角的纵坐标，范围：0~63
+  * 参    数：Width 指定图像的宽度，范围：0~128
+  * 参    数：Height 指定图像的高度，范围：0~64
+  * 参    数：Image 指定要显示的图像
+  * 返 回 值：无
+  * 说    明：调用此函数后，要想真正地呈现在屏幕上，还需调用更新函数
+  */
+void OLED_ShowImage(uint8_t X, uint8_t Y, uint8_t Width, uint8_t Height, const uint8_t *Image)
+{
+	uint8_t i, j;
+	
+	/*参数检查，保证指定图像不会超出屏幕范围*/
+	if (X > 127) {return;}
+	if (Y > 63) {return;}
+	
+	/*将图像所在区域清空*/
+	OLED_ClearArea(X, Y, Width, Height);
+	
+	/*遍历指定图像涉及的相关页*/
+	/*(Height - 1) / 8 + 1的目的是Height / 8并向上取整*/
+	for (j = 0; j < (Height - 1) / 8 + 1; j ++)
+	{
+		/*遍历指定图像涉及的相关列*/
+		for (i = 0; i < Width; i ++)
+		{
+			/*超出边界，则跳过显示*/
+			if (X + i > 127) {break;}
+			if (Y / 8 + j > 7) {return;}
+			
+			/*显示图像在当前页的内容*/
+			OLED_DisplayBuf[Y / 8 + j][X + i] |= Image[j * Width + i] << (Y % 8);
+			
+			/*超出边界，则跳过显示*/
+			/*使用continue的目的是，下一页超出边界时，上一页的后续内容还需要继续显示*/
+			if (Y / 8 + j + 1 > 7) {continue;}
+			
+			/*显示图像在下一页的内容*/
+			OLED_DisplayBuf[Y / 8 + j + 1][X + i] |= Image[j * Width + i] >> (8 - Y % 8);
+		}
+	}
 }

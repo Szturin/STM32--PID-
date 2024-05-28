@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Driver;..\Library;..\Start;..\User;..\System</IncludePath>
+              <IncludePath>..\Driver;..\Library;..\Start;..\User;..\System;..\Driver\MPU6050;..\Driver\MPU6050_DMP</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -624,6 +624,91 @@
               <FileName>Serial.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Driver\Serial.h</FilePath>
+            </File>
+            <File>
+              <FileName>PID.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\PID.c</FilePath>
+            </File>
+            <File>
+              <FileName>PID.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\PID.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>MPU6050</GroupName>
+          <Files>
+            <File>
+              <FileName>MPU6050.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\MPU6050\MPU6050.c</FilePath>
+            </File>
+            <File>
+              <FileName>MyIIC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\MPU6050\MyIIC.c</FilePath>
+            </File>
+            <File>
+              <FileName>MPU6050.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\MPU6050\MPU6050.h</FilePath>
+            </File>
+            <File>
+              <FileName>MPU6050_Reg.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\MPU6050\MPU6050_Reg.h</FilePath>
+            </File>
+            <File>
+              <FileName>MyIIC.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\MPU6050\MyIIC.h</FilePath>
+            </File>
+            <File>
+              <FileName>MPU_EXIT.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\MPU6050\MPU_EXIT.c</FilePath>
+            </File>
+            <File>
+              <FileName>MPU_EXIT.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\MPU6050\MPU_EXIT.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>MPU6050_DMP</GroupName>
+          <Files>
+            <File>
+              <FileName>dmpKey.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\MPU6050_DMP\dmpKey.h</FilePath>
+            </File>
+            <File>
+              <FileName>inv_mpu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\MPU6050_DMP\inv_mpu.c</FilePath>
+            </File>
+            <File>
+              <FileName>dmpmap.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\MPU6050_DMP\dmpmap.h</FilePath>
+            </File>
+            <File>
+              <FileName>inv_mpu_dmp_motion_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\MPU6050_DMP\inv_mpu_dmp_motion_driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>inv_mpu.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\MPU6050_DMP\inv_mpu.h</FilePath>
+            </File>
+            <File>
+              <FileName>inv_mpu_dmp_motion_driver.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\MPU6050_DMP\inv_mpu_dmp_motion_driver.h</FilePath>
             </File>
           </Files>
         </Group>

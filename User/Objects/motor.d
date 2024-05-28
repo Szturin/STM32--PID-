@@ -31,3 +31,4 @@
 .\objects\motor.o: ..\Driver\PWM.h
 .\objects\motor.o: ..\System\timer.h
 .\objects\motor.o: ..\Driver\motor.h
+.\objects\motor.o: ..\Driver\PID.h

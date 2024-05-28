@@ -2,6 +2,7 @@
 #include <PWM.h>
 #include <timer.h>
 #include <motor.h>
+#include <PID.h>
 
 /*宏定义，方便替换引脚*/
 #define	LOGIC_A_1 GPIO_Pin_14
@@ -19,34 +20,25 @@ void Motor_PWM_Init(void)
 	TIM2_PWM_Init(7200-1,1-1);
 }
 
-void Motor_SpeedSet(int16_t Speed1,int16_t Speed2)
+uint32_t num_counter_pwm=0;
+
+void Motor_SpeedSet_Vertical(int16_t Speed)
 {
-	if(Speed1>0)
+	if(Speed>0)
 	{
-		GPIO_SetBits(GPIOB, LOGIC_A_1);
-		GPIO_ResetBits(GPIOB, LOGIC_A_2);
-		TIM_SetCompare3(TIM2,Speed1);
-					
+		GPIO_SetBits(GPIOB, LOGIC_A_1 | LOGIC_B_1);
+		GPIO_ResetBits(GPIOB, LOGIC_A_2 | LOGIC_B_2);	
+		TIM_SetCompare3(TIM2,Speed);
+		TIM_SetCompare4(TIM2,Speed);			
 	}
 	else
 	{
-		GPIO_SetBits(GPIOB, LOGIC_A_2);	
-		GPIO_ResetBits(GPIOB, LOGIC_A_1);
-		TIM_SetCompare3(TIM2,-Speed1);     	
+		GPIO_SetBits(GPIOB, LOGIC_A_2|LOGIC_B_2);	
+		GPIO_ResetBits(GPIOB, LOGIC_A_1|LOGIC_B_1);
+		TIM_SetCompare3(TIM2,-Speed); 
+		TIM_SetCompare4(TIM2,-Speed);    	
 	}
-	
-	if(Speed2>0)
-	{
-		GPIO_SetBits(GPIOB, LOGIC_B_1);
-		GPIO_ResetBits(GPIOB, LOGIC_B_2);		
-		TIM_SetCompare4(TIM2,Speed2);
-	}
-	else
-	{
-		GPIO_SetBits(GPIOB, LOGIC_B_2);
-		GPIO_ResetBits(GPIOB, LOGIC_B_1);		
-		TIM_SetCompare4(TIM2,-Speed2);	
-	}
+	num_counter_pwm++;
 }
 
 void Motor_GPIO_Init()
