@@ -14,6 +14,7 @@
  *      @details    All functions are preceded by the dmp_ prefix to
  *                  differentiate among MPL and general driver function calls.
  */
+#include "stm32f10x.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -23,11 +24,10 @@
 #include "inv_mpu_dmp_motion_driver.h"
 #include "dmpKey.h"
 #include "dmpmap.h"
-//#include "usart.h"
-#include "Delay.h"
+#include "delay.h"
+#include "usart.h"
 
 #define  MOTION_DRIVER_TARGET_MSP430
-
 /* The following functions must be defined for this platform:
  * i2c_write(unsigned char slave_addr, unsigned char reg_addr,
  *      unsigned char length, unsigned char const *data)
@@ -40,7 +40,7 @@
 //#include "msp430.h"
 //#include "msp430_clock.h"
 #define delay_ms    delay_ms
-#define get_ms      mget_ms
+#define get_ms      get_ms
 #define log_i(...)     do {} while (0)
 #define log_e(...)     do {} while (0)
 
@@ -67,7 +67,7 @@
 #define log_e       MPL_LOGE
 
 #else
-#error  Gyro driver is missing the system layer implementations.
+//#error  Gyro driver is missing the system layer implementations.
 #endif
 
 /* These defines are copied from dmpDefaultMPU6050.c in the general MPL
@@ -496,7 +496,6 @@ struct dmp_s {
 //    .fifo_rate = 0,
 //    .packet_length = 0
 //};
-
 static struct dmp_s dmp={
   NULL,
   NULL,
@@ -505,7 +504,6 @@ static struct dmp_s dmp={
   0,
   0
 };
-
 /**
  *  @brief  Load the DMP with this image.
  *  @return 0 if successful.
@@ -639,7 +637,7 @@ int dmp_set_accel_bias(long *bias)
 
     mpu_get_accel_sens(&accel_sens);
     accel_sf = (long long)accel_sens << 15;
-    __nop();
+    //__no_operation();
 
     accel_bias_body[0] = bias[dmp.orient & 3];
     if (dmp.orient & 4)
@@ -1282,7 +1280,8 @@ int dmp_read_fifo(short *gyro, short *accel, long *quat,
         return -1;
 
     /* Parse DMP packet. */
-    if (dmp.feature_mask & (DMP_FEATURE_LP_QUAT | DMP_FEATURE_6X_LP_QUAT)) {
+    if (dmp.feature_mask & (DMP_FEATURE_LP_QUAT | DMP_FEATURE_6X_LP_QUAT))
+			{
 #ifdef FIFO_CORRUPTION_CHECK
         long quat_q14[4], quat_mag_sq;
 #endif
@@ -1380,3 +1379,85 @@ int dmp_register_android_orient_cb(void (*func)(unsigned char))
  *  @}
  */
 
+/*add by miaowlabs*/
+ /*-------------------------------------------------------------------*/
+ /* These next two functions converts the orientation matrix (see
+ * gyro_orientation) to a scalar representation for use by the DMP.
+ * NOTE: These functions are borrowed from Invensense's MPL.
+ */
+static  unsigned short inv_row_2_scale(const signed char *row)
+{
+    unsigned short b;
+
+    if (row[0] > 0)
+        b = 0;
+    else if (row[0] < 0)
+        b = 4;
+    else if (row[1] > 0)
+        b = 1;
+    else if (row[1] < 0)
+        b = 5;
+    else if (row[2] > 0)
+        b = 2;
+    else if (row[2] < 0)
+        b = 6;
+    else
+        b = 7;      // error
+    return b;
+}
+/*add by miaowlabs*/
+unsigned short inv_orientation_matrix_to_scalar(
+    const signed char *mtx)
+{
+    unsigned short scalar;
+
+    /*
+       XYZ  010_001_000 Identity Matrix
+       XZY  001_010_000
+       YXZ  010_000_001
+       YZX  000_010_001
+       ZXY  001_000_010
+       ZYX  000_001_010
+     */
+
+    scalar = inv_row_2_scale(mtx);
+    scalar |= inv_row_2_scale(mtx + 3) << 3;
+    scalar |= inv_row_2_scale(mtx + 6) << 6;
+
+
+    return scalar;
+}
+
+/*add by miaowlabs*/
+void run_self_test(void)
+{
+    int result;
+//    char test_packet[4] = {0};
+    long gyro[3], accel[3];
+
+    result = mpu_run_self_test(gyro, accel);
+    if (result == 0x3) {
+        /* Test passed. We can trust the gyro data here, so let's push it down
+         * to the DMP.
+         */
+        float sens;
+        unsigned short accel_sens;
+        mpu_get_gyro_sens(&sens);
+        gyro[0] = (long)(gyro[0] * sens);
+        gyro[1] = (long)(gyro[1] * sens);
+        gyro[2] = (long)(gyro[2] * sens);
+        dmp_set_gyro_bias(gyro);
+        mpu_get_accel_sens(&accel_sens);
+        accel[0] *= accel_sens;
+        accel[1] *= accel_sens;
+        accel[2] *= accel_sens;
+        dmp_set_accel_bias(accel);
+		PrintChar("setting bias succesfully ......\n");
+    }
+	else
+	{
+		PrintChar("bias has not been modified ......\n");
+	}
+
+
+}

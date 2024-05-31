@@ -6,23 +6,30 @@
 #define SCL_PORT	GPIOB
 #define SCL_PIN		GPIO_Pin_8
 
+static void I2C_delay(void)
+{
+    volatile int i = 7;
+    while (i)
+        i--;
+}
+
 void MPU6050_IIC_W_SCL(uint8_t BitValue)
 {
 	GPIO_WriteBit(GPIOB,SCL_PIN,(BitAction)BitValue);//BitAction是枚举变量类型,包括RESET和SET两种变量
-	Delay_us(10);
+	I2C_delay();
 }	
 
 void MPU6050_IIC_W_SDA(uint8_t BitValue)
 {
 	GPIO_WriteBit(GPIOB,SDA_PIN,(BitAction)BitValue);//BitAction是枚举变量类型,包括RESET和SET两种变量
-	Delay_us(10);
+	I2C_delay();
 }
 
 uint8_t MPU6050_IIC_R_SDA(void)
 {
 	uint8_t BitValue;
 	BitValue = GPIO_ReadInputDataBit(GPIOB,SDA_PIN);
-	Delay_us(10);
+	I2C_delay();
 	return BitValue;
 }
 
@@ -31,7 +38,7 @@ void MPU6050_IIC_Init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
 	
 	GPIO_InitTypeDef GPIO_InitStructure; //结构体类型(已经定义好的） 结构体变量名 ->结构体变量的定义
-	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Pin=SDA_PIN|SCL_PIN;
 	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_OD;//开漏输出模式
 	GPIO_Init(GPIOB,&GPIO_InitStructure);

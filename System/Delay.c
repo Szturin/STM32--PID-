@@ -54,7 +54,13 @@ void Delay_s(uint32_t xs)
 	}
 } 
 
-void MyGet_ms(unsigned long *time)
+void mget_ms(unsigned long *time)
 {
 
 }
+
+void get_ms(unsigned long *time)
+{
+
+}
+

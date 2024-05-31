@@ -6,8 +6,18 @@
 #include "inv_mpu_dmp_motion_driver.h"
 #include "math.h"
 #include "delay.h"
+#include "usart.h"
 #define MPU6050_ADDRESS 	0x68
 
+static signed char gyro_orientation[9] = {-1, 0, 0,
+                                           0,-1, 0,
+                                           0, 0, 1};
+float q0=1.0f,q1=0.0f,q2=0.0f,q3=0.0f;
+float Pitch,Roll,Yaw;
+unsigned long sensor_timestamp;
+short gyro[3], accel[3], sensors;
+unsigned char more;
+long quat[4];
 
 void MPU6050_WriteReg_Byte(uint8_t RegAddress,uint8_t Data)
 {
@@ -128,20 +138,16 @@ u8 MPU_Set_Rate(u16 rate)
 void MPU6050_Init(void)
 {
 	MPU6050_IIC_Init();
-	MPU6050_WriteReg_Byte(0x6B,0x80);//复位
-	delay_ms(500);              //等待复位完成
-	MPU6050_WriteReg_Byte(0x6B,0x00);//取消睡眠
-	delay_ms(10);
-	MPU6050_WriteReg_Byte(0x1B,0x00);//设置陀螺仪量程为500°/s
-	delay_ms(10);
-	MPU6050_WriteReg_Byte(0x1C,0x00);//设置加速度计量程2G
-	delay_ms(10);
-	MPU_Set_Rate(50);
-	delay_ms(10);
-	MPU6050_WriteReg_Byte(0x6B,0x02);//使用陀螺仪的晶振作为时钟
-	delay_ms(10);
-	MPU6050_WriteReg_Byte(0x6C,0x00);
-	delay_ms(10);
+	MPU6050_WriteReg_Byte(PWR_MGMT_1,0x00);//解除休眠状态
+	delay_ms(100);
+	MPU6050_WriteReg_Byte(SMPLRT_DIV,0x07);
+	delay_ms(50);
+	MPU6050_WriteReg_Byte(CONFIG,0x06);
+	delay_ms(50);
+	MPU6050_WriteReg_Byte(GYRO_CONFIG,0x00);
+	delay_ms(50);
+	MPU6050_WriteReg_Byte(ACCEL_CONFIG,0x00);
+	delay_ms(50); 	
 }
 
 
@@ -208,5 +214,136 @@ void MPU6050_GetData_T(int16_t *AccX,int16_t *AccY,int16_t *AccZ,
 	MPU6050_ReadReg_Str(MPU6050_ADDRESS,MPU6050_GYRO_ZOUT_H,1,&DataH);
 	MPU6050_ReadReg_Str(MPU6050_ADDRESS,MPU6050_GYRO_ZOUT_L,1,&DataL);
 	*GyroZ = (DataH<<8) | DataL;
+}
+
+void MPU6050_DMP_Init(void)
+{
+	int result=0;
+	//IIC_Init();
+	result=mpu_init();
+	if(!result)
+	{	 		 
+	
+		PrintChar("mpu initialization complete......\n ");		//mpu initialization complete	 	  
+
+		if(!mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL))		//mpu_set_sensor
+			PrintChar("mpu_set_sensor complete ......\n");
+		else
+			PrintChar("mpu_set_sensor come across error ......\n");
+
+		if(!mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL))	//mpu_configure_fifo
+			PrintChar("mpu_configure_fifo complete ......\n");
+		else
+			PrintChar("mpu_configure_fifo come across error ......\n");
+
+		if(!mpu_set_sample_rate(DEFAULT_MPU_HZ))	   	  		//mpu_set_sample_rate
+		 PrintChar("mpu_set_sample_rate complete ......\n");
+		else
+		 	PrintChar("mpu_set_sample_rate error ......\n");
+
+		if(!dmp_load_motion_driver_firmware())   	  			//dmp_load_motion_driver_firmvare
+			PrintChar("dmp_load_motion_driver_firmware complete ......\n");
+		else
+			PrintChar("dmp_load_motion_driver_firmware come across error ......\n");
+
+		if(!dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation))) 	  //dmp_set_orientation
+		 	PrintChar("dmp_set_orientation complete ......\n");
+		else
+		 	PrintChar("dmp_set_orientation come across error ......\n");
+
+		if(!dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT | DMP_FEATURE_TAP |
+		    DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_CAL_GYRO |
+		    DMP_FEATURE_GYRO_CAL))		   	 					 //dmp_enable_feature
+		 	PrintChar("dmp_enable_feature complete ......\n");
+		else
+		 	PrintChar("dmp_enable_feature come across error ......\n");
+
+		if(!dmp_set_fifo_rate(DEFAULT_MPU_HZ))   	 			 //dmp_set_fifo_rate
+		 	PrintChar("dmp_set_fifo_rate complete ......\n");
+		else
+		 	PrintChar("dmp_set_fifo_rate come across error ......\n");
+
+		run_self_test();		//自检
+
+		if(!mpu_set_dmp_state(1))
+		 	PrintChar("mpu_set_dmp_state complete ......\n");
+		else
+		 	PrintChar("mpu_set_dmp_state come across error ......\n");
+	}
+	else												 //MPU6050状态指示灯 STM32核心板 PC13 绿色灯亮起为不正常
+	 {
+	 GPIO_ResetBits(GPIOC, GPIO_Pin_13);				//MPU6050状态指示灯 STM32核心板 PC13 绿色灯亮起为不正常
+	 while(1);
+	 }
+	 
+}
+
+
+void MPU6050_Pose(void)
+{
+	
+	dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors,&more);	 
+	/* Gyro and accel data are written to the FIFO by the DMP in chip frame and hardware units.
+	 * This behavior is convenient because it keeps the gyro and accel outputs of dmp_read_fifo and mpu_read_fifo consistent.
+	**/
+	/*if (sensors & INV_XYZ_GYRO )
+	send_packet(PACKET_TYPE_GYRO, gyro);
+	if (sensors & INV_XYZ_ACCEL)
+	send_packet(PACKET_TYPE_ACCEL, accel); */
+	/* Unlike gyro and accel, quaternions are written to the FIFO in the body frame, q30.
+	 * The orientation is set by the scalar passed to dmp_set_orientation during initialization. 
+	**/
+	
+	
+	if(sensors & INV_WXYZ_QUAT )
+	{
+		q0 = quat[0] / q30;	
+		q1 = quat[1] / q30;
+		q2 = quat[2] / q30;
+		q3 = quat[3] / q30;
+
+		Pitch = asin(-2 * q1 * q3 + 2 * q0* q2)* 57.3;	// pitch
+		Roll  = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1)*57.3;	// roll
+		Yaw   = atan2(2*(q1*q2 + q0*q3),q0*q0+q1*q1-q2*q2-q3*q3) * 57.3;	//yaw
+    
+		
+	}
+}
+
+/*
+ * 函数名：LED_GPIO_Config
+ * 描述  ：配置LED用到的I/O口
+ * 输入  ：无
+ * 输出  ：无
+ */
+void LED_GPIO_Config(void)
+{		
+	/*定义一个GPIO_InitTypeDef类型的结构体*/
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	/*先开启GPIOB和AFIO的外设时钟*/
+	  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC| RCC_APB2Periph_AFIO,ENABLE);
+
+	/*改变指定管脚的映射 GPIO_Remap_SWJ_JTAGDisable ，JTAG-DP 禁用 + SW-DP 使能*/
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable , ENABLE); 
+
+	/*选择要控制的GPIOB引脚*/															   
+  	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 |GPIO_Pin_14;
+	
+	/*设置引脚速率为50MHz */   
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 	
+
+	/*设置引脚模式为通用推挽输出*/
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;   
+
+	/*调用库函数，初始化GPIOB*/
+  	GPIO_Init(GPIOC, &GPIO_InitStructure);			  
+
+	/* 打开所有led灯	*/
+	GPIO_SetBits(GPIOC, GPIO_Pin_13|GPIO_Pin_14); 
+//	GPIO_ResetBits(GPIOC, GPIO_Pin_13|GPIO_Pin_14); 
+
+
+
 }
 

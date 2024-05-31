@@ -33,8 +33,7 @@
 .\objects\inv_mpu.o: ..\Library\stm32f10x_usart.h
 .\objects\inv_mpu.o: ..\Library\stm32f10x_wwdg.h
 .\objects\inv_mpu.o: ..\Library\misc.h
-.\objects\inv_mpu.o: ..\Driver\MPU6050_DMP\inv_mpu_dmp_motion_driver.h
-.\objects\inv_mpu.o: ..\Driver\MPU6050\MPU6050.h
-.\objects\inv_mpu.o: ..\Driver\MPU6050\MPU6050_T.h
-.\objects\inv_mpu.o: ..\Driver\MPU6050\MyIIC.h
-.\objects\inv_mpu.o: ..\System\Delay.h
+.\objects\inv_mpu.o: ..\Driver\MPU6050\I2C_.h
+.\objects\inv_mpu.o: ..\System\delay.h
+.\objects\inv_mpu.o: D:\keil5\ARM\ARMCC\Bin\..\include\Time.h
+.\objects\inv_mpu.o: ..\Driver\Serial.h

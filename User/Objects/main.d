@@ -41,3 +41,6 @@
 .\objects\main.o: ..\Driver\MPU6050_DMP\inv_mpu.h
 .\objects\main.o: ..\Driver\MPU6050_DMP\MPU6050_DMP.h
 .\objects\main.o: ..\Driver\PID.h
+.\objects\main.o: ..\Driver\MPU6050\MyIIC.h
+.\objects\main.o: ..\Driver\MPU6050\I2C_.h
+.\objects\main.o: ..\Driver\usart.h

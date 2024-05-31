@@ -635,6 +635,16 @@
               <FileType>5</FileType>
               <FilePath>..\Driver\PID.h</FilePath>
             </File>
+            <File>
+              <FileName>usart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\usart.h</FilePath>
+            </File>
+            <File>
+              <FileName>usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\usart.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -674,6 +684,16 @@
               <FileName>MPU_EXIT.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Driver\MPU6050\MPU_EXIT.h</FilePath>
+            </File>
+            <File>
+              <FileName>I2C_.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\MPU6050\I2C_.c</FilePath>
+            </File>
+            <File>
+              <FileName>I2C_.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\MPU6050\I2C_.h</FilePath>
             </File>
           </Files>
         </Group>

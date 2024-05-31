@@ -1,7 +1,7 @@
 
 #include "stm32f10x.h"                  // Device header
 
-const float midvalue = -0.5;//6.5
+const float midvalue = 0;//6.5
 
 typedef struct pid{
 	float Kp;
@@ -20,9 +20,9 @@ PID Vertical;
 
 void Vertical_PID_Init()
 {
-	Vertical.Kp=-40;
+	Vertical.Kp=-600;
 	Vertical.Ki=0;
-	Vertical.Kd=0;
+	Vertical.Kd=-500;
 }
 
 /*

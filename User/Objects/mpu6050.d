@@ -35,3 +35,5 @@
 .\objects\mpu6050.o: ..\Driver\MPU6050_DMP\inv_mpu_dmp_motion_driver.h
 .\objects\mpu6050.o: D:\keil5\ARM\ARMCC\Bin\..\include\math.h
 .\objects\mpu6050.o: ..\System\delay.h
+.\objects\mpu6050.o: ..\Driver\usart.h
+.\objects\mpu6050.o: D:\keil5\ARM\ARMCC\Bin\..\include\stdio.h
