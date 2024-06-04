@@ -219,7 +219,6 @@ void MPU6050_GetData_T(int16_t *AccX,int16_t *AccY,int16_t *AccZ,
 void MPU6050_DMP_Init(void)
 {
 	int result=0;
-	//IIC_Init();
 	result=mpu_init();
 	if(!result)
 	{	 		 
@@ -342,8 +341,5 @@ void LED_GPIO_Config(void)
 	/* 打开所有led灯	*/
 	GPIO_SetBits(GPIOC, GPIO_Pin_13|GPIO_Pin_14); 
 //	GPIO_ResetBits(GPIOC, GPIO_Pin_13|GPIO_Pin_14); 
-
-
-
 }
 

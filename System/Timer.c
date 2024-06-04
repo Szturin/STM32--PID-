@@ -27,9 +27,16 @@ void TIM1_Init(u16 arr,u16 psc)
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;  //从优先级3级
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
 	NVIC_Init(&NVIC_InitStructure);  //初始化NVIC寄存器
-	
-	
 	TIM_Cmd(TIM1, ENABLE); 
-	
-	
+}
+
+void TIM4_IRQHandler(void)
+{ 		    		  			    
+	u16 tsr;
+	tsr=TIM4->SR;	
+	if(tsr&0X0001)//溢出中断
+	{
+																				
+	}				   
+	TIM4->SR&=~(1<<0);//清除中断标志位 	 
 }

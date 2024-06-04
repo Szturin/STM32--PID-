@@ -28,4 +28,9 @@
 .\objects\oled.o: ..\Library\stm32f10x_usart.h
 .\objects\oled.o: ..\Library\stm32f10x_wwdg.h
 .\objects\oled.o: ..\Library\misc.h
-.\objects\oled.o: ..\Driver\OLED_Font.h
+.\objects\oled.o: ..\Driver\OLED.h
+.\objects\oled.o: ..\Driver\OLED_Data.h
+.\objects\oled.o: D:\keil5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\oled.o: D:\keil5\ARM\ARMCC\Bin\..\include\math.h
+.\objects\oled.o: D:\keil5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\oled.o: D:\keil5\ARM\ARMCC\Bin\..\include\stdarg.h

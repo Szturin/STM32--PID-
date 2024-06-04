@@ -176,7 +176,7 @@ void USART3_Init(void)
 }
 
 
-/*
+
 void USART3_IRQHandler(void)
 {
 	static uint8_t RxState = 0;//函数退出后下次不会初始化
@@ -186,6 +186,6 @@ void USART3_IRQHandler(void)
 		USART_ClearITPendingBit(USART3,USART_IT_RXNE);
 	}	
 }
-*/
+
 
 

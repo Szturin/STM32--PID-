@@ -1,9 +1,10 @@
-
 #include "stm32f10x.h"                  // Device header
+#include "PID.h"
 
 const float midvalue = 0;//6.5
 
-typedef struct pid{
+typedef struct 
+{
 	float Kp;
 	float Ki;
 	float Kd;
@@ -17,23 +18,37 @@ typedef struct pid{
 }PID;
 
 PID Vertical;
+PID Velocity;
 
 void Vertical_PID_Init()
 {
-	Vertical.Kp=-600;
+	Vertical.Kp=-600;//1000*0.6 //780
 	Vertical.Ki=0;
-	Vertical.Kd=-500;
+	Vertical.Kd=-7200;//12000*0.6 //3200
 }
 
-/*
-void I_amplitude_limiting(int number)
+void Velociy_PID_Init()
 {
-	if(Error_sum>number)
+	Velocity.Kp=240;
+	Velocity.Ki=1.2;
+	Velocity.Kd=0;
+	;
+}
+
+
+void I_amplitude_limiting(float number,float *Error_sum)
+{
+	if(*Error_sum > number)
 	{
-		Error_sum=number;
+		*Error_sum = number;
+	}
+	
+	if(*Error_sum <- number)
+	{
+		*Error_sum = -number;
 	}
 }
-*/
+
 
 /*
 //PID控制系统:P、I、D共同作用
@@ -65,3 +80,20 @@ float Vertical_PID(float Pitch)
 
 	return Vertical.Kp*Vertical.error + Vertical.Ki*Vertical.error_sum + Vertical.Kd*Vertical.error_difference;//PID控制器响应结果  
 }
+
+float Velocity_PID(float velocity)
+{
+	float a = 0.3;
+	
+	static float filt_velocity=0;
+	static float last_filt_velocity=0;
+	
+	Velocity.error = filt_velocity;//误差值
+	filt_velocity = a*velocity+(1-a)*last_filt_velocity;
+	I_amplitude_limiting(3000,&Velocity.error_sum);
+	Velocity.error_sum += Velocity.error;//误差累加
+	last_filt_velocity = filt_velocity;
+	
+	return Velocity.Kp*Velocity.error + Velocity.Ki*Velocity.error_sum;//PID控制器响应结果  
+}
+

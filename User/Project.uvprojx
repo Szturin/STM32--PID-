@@ -645,6 +645,16 @@
               <FileType>1</FileType>
               <FilePath>..\Driver\usart.c</FilePath>
             </File>
+            <File>
+              <FileName>OLED_Data.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\OLED_Data.c</FilePath>
+            </File>
+            <File>
+              <FileName>OLED_Data.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\OLED_Data.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -654,11 +664,6 @@
               <FileName>MPU6050.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Driver\MPU6050\MPU6050.c</FilePath>
-            </File>
-            <File>
-              <FileName>MyIIC.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Driver\MPU6050\MyIIC.c</FilePath>
             </File>
             <File>
               <FileName>MPU6050.h</FileName>
@@ -671,21 +676,6 @@
               <FilePath>..\Driver\MPU6050\MPU6050_Reg.h</FilePath>
             </File>
             <File>
-              <FileName>MyIIC.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\MPU6050\MyIIC.h</FilePath>
-            </File>
-            <File>
-              <FileName>MPU_EXIT.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Driver\MPU6050\MPU_EXIT.c</FilePath>
-            </File>
-            <File>
-              <FileName>MPU_EXIT.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\MPU6050\MPU_EXIT.h</FilePath>
-            </File>
-            <File>
               <FileName>I2C_.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Driver\MPU6050\I2C_.c</FilePath>
@@ -694,6 +684,16 @@
               <FileName>I2C_.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Driver\MPU6050\I2C_.h</FilePath>
+            </File>
+            <File>
+              <FileName>MyIIC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\MPU6050\MyIIC.c</FilePath>
+            </File>
+            <File>
+              <FileName>MyIIC.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Driver\MPU6050\MyIIC.h</FilePath>
             </File>
           </Files>
         </Group>
