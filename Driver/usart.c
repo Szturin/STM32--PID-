@@ -13,6 +13,9 @@
 #include "misc.h"
 //串口接收DMA缓存
 uint8_t Uart_Rx[UART_RX_LEN] = {0};
+uint8_t bluetooth;
+extern float Velocity_calcu;
+extern float Yaw_setting;
 /*
  * 函数名：USART1_Config
  * 描述  ：USART1 GPIO 配置,工作模式配置。115200 8-N-1
@@ -317,3 +320,29 @@ void PrintUart3(char *s)
 		p++;
 	}
 }
+
+void USART3_IRQHandler(void)          	
+{
+	if(USART_GetITStatus(USART3,USART_IT_RXNE) != RESET)
+	{
+		bluetooth = USART_ReceiveData(USART3); //通过串口2接收数据   	
+		
+		//【2.调前后跑】
+		if(bluetooth=='W') {Velocity_calcu=10;}
+		if(bluetooth=='S') {Velocity_calcu=-10;}
+		if(bluetooth=='Q') {Velocity_calcu=0;Yaw_setting=0;}//复位
+		
+		if(bluetooth=='A')
+		{
+			Yaw_setting+=10.0;
+			if(Yaw_setting>=160.0){Yaw_setting=160.0;}
+		}
+		
+		if(bluetooth=='D')
+		{
+			Yaw_setting-=10.0;
+			if(Yaw_setting<=-160.0){Yaw_setting=-160.0;}
+		}
+  } 
+} 
+ 

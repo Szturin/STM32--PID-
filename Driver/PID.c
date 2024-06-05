@@ -19,6 +19,7 @@ typedef struct
 
 PID Vertical;
 PID Velocity;
+PID Turn;
 
 void Vertical_PID_Init()
 {
@@ -32,7 +33,14 @@ void Velociy_PID_Init()
 	Velocity.Kp=240;
 	Velocity.Ki=1.2;
 	Velocity.Kd=0;
-	;
+	
+}
+
+void Turn_PID_Init()
+{
+	Turn.Kp=-60;
+	Turn.Ki=0;
+	Turn.Kd=0;
 }
 
 
@@ -81,19 +89,26 @@ float Vertical_PID(float Pitch)
 	return Vertical.Kp*Vertical.error + Vertical.Ki*Vertical.error_sum + Vertical.Kd*Vertical.error_difference;//PID控制器响应结果  
 }
 
-float Velocity_PID(float velocity)
+float Velocity_PID(float velocity,float velocity_calcu)
 {
 	float a = 0.3;
 	
 	static float filt_velocity=0;
 	static float last_filt_velocity=0;
 	
-	Velocity.error = filt_velocity;//误差值
+	Velocity.error = filt_velocity - velocity_calcu;//误差值
 	filt_velocity = a*velocity+(1-a)*last_filt_velocity;
 	I_amplitude_limiting(3000,&Velocity.error_sum);
 	Velocity.error_sum += Velocity.error;//误差累加
 	last_filt_velocity = filt_velocity;
 	
 	return Velocity.Kp*Velocity.error + Velocity.Ki*Velocity.error_sum;//PID控制器响应结果  
+}
+
+float Turn_PID(float yaw,float yaw_calcu)
+{
+	Turn.error= yaw - yaw_calcu;
+	
+	return Turn.Kp*Turn.error;
 }
 

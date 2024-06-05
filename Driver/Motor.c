@@ -41,6 +41,31 @@ void Motor_SpeedSet_Vertical(int16_t Speed)
 	num_counter_pwm++;
 }
 
+void Motor_PWMSet(int16_t PWM1,int16_t PWM2)
+{
+	if(PWM1>0)
+	{
+		GPIO_SetBits(GPIOB, LOGIC_A_1 | LOGIC_B_1);
+		TIM_SetCompare3(TIM2,PWM1);	
+	}
+	else
+	{
+		GPIO_SetBits(GPIOB, LOGIC_A_2|LOGIC_B_2);	
+		TIM_SetCompare3(TIM2,-PWM1); 
+	}
+	
+	if(PWM2>0)
+	{
+		GPIO_ResetBits(GPIOB, LOGIC_A_2 | LOGIC_B_2);	
+		TIM_SetCompare4(TIM2,PWM2);			
+	}
+	else
+	{
+		GPIO_ResetBits(GPIOB, LOGIC_A_1|LOGIC_B_1);
+		TIM_SetCompare4(TIM2,-PWM2);    	
+	}
+}
+
 void Motor_GPIO_Init()
 {	
 	GPIO_InitTypeDef GPIO_InitStructure; //结构体类型(已经定义好的） 结构体变量名 ->结构体变量的定义

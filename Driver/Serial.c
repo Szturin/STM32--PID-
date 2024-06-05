@@ -177,15 +177,5 @@ void USART3_Init(void)
 
 
 
-void USART3_IRQHandler(void)
-{
-	static uint8_t RxState = 0;//函数退出后下次不会初始化
-	static uint8_t pRxState = 0;//表示当前接收的是第几个变量
-	if(USART_GetITStatus(USART3,USART_IT_RXNE)==SET)
-	{	
-		USART_ClearITPendingBit(USART3,USART_IT_RXNE);
-	}	
-}
-
 
 

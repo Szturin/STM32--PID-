@@ -21,8 +21,14 @@ float PWM_ALL;//总PWM
 
 int16_t speed,speed2;
 float Velociy_meause;
+
+float Velocity_calcu=0;
+float Yaw_setting=0;
+
 float PWM_Vertical;//直立环PWM分量
 float PWM_Velociy;
+float PWM_1;
+float PWM_2;
 float PWM_0;
 
 float Speed;//速度
@@ -69,6 +75,7 @@ int main(void)
 	Vertical_PID_Init();//PID直立环初值初始化
 	Velociy_PID_Init();
 	Roll_Wave_Init();
+	Turn_PID_Init();
 	while(1)
 	{
 		//printf("%f\r\n",Roll);//串口发送ROLL值
@@ -76,9 +83,10 @@ int main(void)
 		//OLED_DrawWave(&Roll_Wave.t,&Roll_Wave.Roll,&Roll_Wave.t_temp,&Roll_Wave.Roll_temp,32,126,126);//绘制波形
 		//printf("speed1:%d speed2:%d\r\n",speed,speed2);
 		//printf("suduhuan:%f\r\n",PWM_Velociy);
-		//OLED_ShowSignedNum(0,0,speed,5,OLED_6X8);
+		OLED_ShowSignedNum(0,0,Velocity_calcu,5,OLED_6X8);
+		OLED_ShowSignedNum(8,8,Yaw_setting,5,OLED_6X8);
 		//OLED_ShowSignedNum(0,8,speed2,5,OLED_6X8);
-		//OLED_Update();
+		OLED_Update();
 		if(Roll>= 60 | Roll <=-60)//电机保护,倾斜角大于60度关闭电机，防止电机堵转
 		{		
 			Motor_SpeedSet_Vertical(0);
@@ -102,14 +110,14 @@ void TIM1_UP_IRQHandler(void)   //TIM1中断
 			
 			Velociy_meause = (speed+speed2)/2.0;
 			
-			PWM_Vertical=Vertical_PID(Roll);
-			PWM_Velociy=Velocity_PID(Velociy_meause);
+			PWM_0=Vertical_PID(Roll)+Velocity_PID(Velociy_meause,Velocity_calcu);//直立环+速度环PWM;
 			
-			PWM_0=PWM_Vertical+PWM_Velociy;
-			Motor_SpeedSet_Vertical((int16_t)PWM_0);
+			PWM_1=PWM_0+Turn_PID(Yaw,Yaw_setting);
+			PWM_2=PWM_0-Turn_PID(Yaw,Yaw_setting);
+			
+			Motor_PWMSet((int16_t)PWM_1,(int16_t)PWM_2);		
 		}
 		
-
 		OLED_DrawWave_Cycle(&Roll_Wave.Wave_Timer,&Roll_Wave.t,4);//OLED波形绘制时钟使能
 		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);  //清除TIMx的中断待处理位:TIM1 中断源 	
 	}
