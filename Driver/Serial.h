@@ -6,8 +6,7 @@ extern char Serial_RxPacket[];
 extern uint8_t Serial_RxFlag;
 extern uint8_t RxState;
 extern uint8_t pRxState;//表示当前接收的是第几个变量
-extern uint8_t num_c;
-extern uint8_t RxState_Flag;
+extern uint8_t RxData_type;
 extern uint8_t Sign_Flag;
 
 void Serial_Init(void);

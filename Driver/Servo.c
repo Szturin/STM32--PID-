@@ -21,21 +21,25 @@ void Servo_GPIO_Init()
 	
 }
 
+//PWM方波周期设置为20ms,舵机才能正常工作
 void Servo_PWM_Init(void)
 {	
 	Servo_GPIO_Init();
 	TIM2_PWM_Init(10000-1,72-1);
 }
 
+/*X维舵机控制*/
 void Servo_SetAngle_Y(float Angle)
 {
 	TIM_SetCompare3(TIM2,(unsigned int)(Angle / 180 * 1800 + 600));//500偏移
 }
 
+/*Y维舵机控制*/
 void Servo_SetAngle_X(float Angle)
 {
 	TIM_SetCompare4(TIM2,(unsigned int)(Angle / 180 * 1800 + 600));//500偏移
 }
+
 uint32_t num_counter_pwm=0;
 
 

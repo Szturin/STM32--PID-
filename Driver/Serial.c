@@ -170,69 +170,61 @@ void USART3_Init(void)
 	USART_Cmd(USART3, ENABLE);
 }
 
+/*上位机发送特征值给单片机，建议采取十六进制数据帧的格式，数据处理效率更高*/
 void USART3_IRQHandler(void)          	
 {
+	unsigned char i =0;
 	if(USART_GetITStatus(USART3,USART_IT_RXNE)==SET)
 	{
-		uint8_t RxData = USART_ReceiveData(USART3);
-		num_c++;
-		//数据帧格式
-		if(RxState == 0)//第一个包头
+		uint8_t RxData = USART_ReceiveData(USART3);//取串口接收寄存器值
+
+		if(RxState == 0)//帧头检测
 		{
-			if(RxData == '@' && Serial_RxFlag == 0)
+			if(RxData == 0xFF && Serial_RxFlag == 0)
 			{
 				RxState=1;
 			}
 		}
-		else if(RxState == 0 )
+		else if(RxState == 1)//数据类型检测s
 		{
-			if(RxData == 'x' )//第二个包头
+			if(RxData == 0x2B)//x+
 			{
 				RxState=2;
 				RxState_Flag=1;
 			}
-			else if(RxData == 'y')
+			else if(RxData == 0x2D)//x-
 			{
 				RxState=2;
 				RxState_Flag=2;
 			}		
+			else if(RxData == 0x3B)//y+
+			{
+				RxState=2;
+				RxState_Flag=3;			
+			}
+			else if(RxData == 0x3D)//y-
+			{
+				RxState=2;
+				RxState_Flag=4;			
+			}
 		}
-		else if(RxState == 2)
+		else if(RxState==2)//数据，接收范围限制在单字节，足够完成任务要求
 		{
-			if(RxData == '-')//第三个包头
-			{
-				RxState=3;
-				Sign_Flag=1;
-			}
-			else if(RxData == '+')
-			{
-				RxState=3;
-				Sign_Flag=2;
-			}				
+			
+			Serial_RxPacket[0]=RxData;
+			Serial_RxFlag=1;
+			RxState=0;
 		}
-		else if(RxState==3)
-		{
-			if(RxData == '\r')//第一个包尾
-			{
-				RxState=4;
-			}
-			else//连续接收数据
-			{
-				Serial_RxPacket[pRxState]=RxData;
-				pRxState++;	
-			}
-		}
-		else if(RxState==4)//第二个包尾
-		{
-			if (RxData=='\n')
-			{
-				RxState = 0;
-				Serial_RxFlag=1;
-				Serial_RxPacket[pRxState]='\0';//字符串结束时加上\0,表示字符串的结束
-				printf("RxState:%d\r\n",(unsigned int)RxState);
-			}
-		}
+		
+		USART_ClearFlag(USART3,USART_FLAG_RXNE);//清除RXNE标志位
 		USART_ClearITPendingBit(USART3,USART_IT_RXNE);
 	}
+	
+	/*STM32串口接收过快可能会出现帧错误，触发ORE中断，但是之前没有对此中断进行标志位处理，因此一旦串口通信速率过快，会导致程序卡死在ORE中断程序中*/
+	if(USART_GetFlagStatus(USART3, USART_IT_ORE) != RESET)  //需要用USART_GetFlagStatus函数来检查ORE溢出中断
+	{
+		USART_ClearFlag(USART3,USART_FLAG_ORE);//清除ORE标志位
+		USART_ReceiveData(USART3);	           //抛弃接收到的数据			
+    } 
 } 
 

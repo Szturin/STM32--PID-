@@ -8,117 +8,57 @@
 #include <Key.h>				//按键
 #include <PWM.H>				//PWM
 #include <Serial.H>				//串口
+#include <PID.h>				//“位置式”PID
 
 float Angle_X=90;		//X轴转角
-float Angle_Y=30;		//Y轴转角
-float Angle_Out_Inc_x;	//X轴转角
-float Angle_Out_Inc_y;  //Y轴转角
+float Angle_Y=20;		//Y轴转角
 
-uint8_t counter;		
-float Angle_X_err;
-float Angle_Y_err;
-
-float laser_Pose_control(float Expet ,float Measure)
-{
-    static float Kp = 0.02;
-    static float Ki = 0.01;
-    static float Kd = 0.01;
-    //误差，上一次误差，上上一次误差
-    static float ERR,Last_ERR,LastLast_ERR;
-    float Out_Inc;
-    //误差更新
-    ERR = Expet - Measure;
-    //计算
-
-    Out_Inc = Kp*(ERR - Last_ERR ) + Ki*Last_ERR + Kd*(ERR - 2*Last_ERR + LastLast_ERR);
-
-    //误差更新
-
-    Last_ERR = ERR;
-
-    LastLast_ERR = Last_ERR;
-
-    return Out_Inc;
-}
-
-int Serial_pow(unsigned int x,unsigned int y)
-{
-	unsigned char i=0;
-	int result;
-	
-	if(y == 0)
-	{
-		result =1;
-	}
-	else
-	{
-		for(i=1;i<y;i++)
-		{
-			result*=x;
-		}
-	}
-	return result;
-}//mark
+float Angle_X_err;		//X轴误差值
+float Angle_Y_err;		//Y轴误差值
 
 int main(void)
 {
 	Servo_PWM_Init();//电机初始化
 	USART3_Init();//串口3初始化
 	OLED_Init();
-	
 	while(1)
 	{
-		counter++;
-		//Servo_SetAngle_Y(Serial_RxPacket[0]);
-		//print发送的是ascii码,6 --> 0x36
-
-		if(Serial_RxFlag)
+		/*若中断进入速率过快，此程序建议放入中断函数中，否则容易被频繁打断*/
+		if(Serial_RxFlag)//判断数据帧是否完成
 		{	
-			Angle_X_err=0;
-			unsigned char i;
-			for(i=0; i<pRxState;i++)
-			{	
-				if(RxState_Flag==1)//X轴数据据
-				{
-					if(Sign_Flag==1)//负数
-					{						
-						Angle_X_err -= (Serial_RxPacket[i]-0x30)*Serial_pow(10,i);
-					}
-					else if(Sign_Flag==2)//正数
-					{
-						Angle_X_err += (Serial_RxPacket[i]-0x30)*Serial_pow(10,i);
-					}
-				}
-				else if(RxState_Flag==2)//y轴数据
-				{
-					if(Sign_Flag==1)//负数
-					{						
-						Angle_Y_err -= (Serial_RxPacket[i]-0x30)*Serial_pow(10,i);
-					}
-					else if(Sign_Flag==2)//正数
-					{
-						Angle_Y_err += (Serial_RxPacket[i]-0x30)*Serial_pow(10,i);
-					}					
-				}
-				
-				OLED_ShowNum(0,0+i*16,Serial_RxPacket[i]-0x30,1,8);
-				OLED_Update();			
+			Angle_X_err=0;//清空误差值
+			Angle_Y_err=0;//清空误差值	
+			switch(RxData_type)//判断数据帧的数据类型
+			{
+				case 1:
+					Angle_X_err = Serial_RxPacket[0];
+					break;
+				case 2:
+					Angle_X_err = -Serial_RxPacket[0];
+					break;
+				case 3:
+					Angle_Y_err = Serial_RxPacket[0];
+					break;
+				case 4:
+					Angle_Y_err = -Serial_RxPacket[0];
+					break;
 			}
-			pRxState=0;//MARK:忘记清零
-			Serial_RxFlag=0;
+			Serial_RxFlag=0;//清除帧标志位		
+
+			laser_Pose_control_X(Angle_X_err,0);//更新函数数据，数据类型定义存在bug，调用此函数清除缓存值
+			Angle_X += laser_Pose_control_X(Angle_X_err,0);//增量赋值
+			
+			laser_Pose_control_Y(Angle_Y_err,0);//更新函数数据
+			Angle_Y += laser_Pose_control_Y(Angle_Y_err,0);//增量赋值		
+			
+			//二维舵机控制
+			Servo_SetAngle_X(Angle_X);
+			Servo_SetAngle_Y(Angle_Y);
 		}			
-		
-		Angle_Out_Inc_x = laser_Pose_control(Angle_X_err,0);
-		Angle_X += Angle_Out_Inc_x;
-		Angle_Out_Inc_y = laser_Pose_control(Angle_Y_err,0);
-		Angle_Y += Angle_Out_Inc_y;		
-		
-		Servo_SetAngle_X(Angle_X);
-		Servo_SetAngle_Y(Angle_Y);
-		
-		OLED_ShowSignedNum(16,16,Angle_Out_Inc_x,5,8);
+
+		//调试使用，OLED函数较为耗时，建议注释
+		OLED_ShowSignedNum(16,16,Angle_X_err,5,8);
 		OLED_Update();
-		//printf("666\r\n");
 	}
 }
 
