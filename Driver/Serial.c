@@ -1,10 +1,17 @@
 #include "stm32f10x.h"                  // Device header
 #include <stdio.h>
 #include <stdarg.h>
+#include <OLED.H>
+#include <Servo.h>
 
 uint8_t Serial_RxPacket[100];
 uint8_t Serial_RxFlag;
+uint8_t RxState = 0;
+uint8_t pRxState;//表示当前接收的是第几个变量
+uint8_t num_c;
 
+uint8_t RxState_Flag;
+uint8_t Sign_Flag;
 
 void Serial_Init(void)
 {
@@ -97,13 +104,13 @@ void Serial_SendNumber(uint32_t Number,uint8_t Length)
 	}
 }
 
-/*
+
 int fputc(int ch,FILE * f)
 {
 	Serial_SendByte(ch);
 	return ch;
 }
-*/
+
 // 可变参数
 void Serial_Printf(char * format,...)
 {
@@ -113,18 +120,6 @@ void Serial_Printf(char * format,...)
 	vsprintf(String,format,arg);
 	va_end(arg);//释放参数列表
 	Serial_SendString(String);
-}
-
-//串口中断函数
-void USART1_IRQHandler(void)
-{
-	static uint8_t RxState = 0;//函数退出后下次不会初始化
-	static uint8_t pRxState = 0;//表示当前接收的是第几个变量
-	if(USART_GetITStatus(USART1,USART_IT_RXNE)==SET)
-	{	
-		USART_ClearITPendingBit(USART1,USART_IT_RXNE);
-	}
-	
 }
 
 //尝试自己配置一遍
@@ -142,7 +137,7 @@ void USART3_Init(void)
 	/* Configure USART3 Tx (PB.10) as alternate function push-pull 推拉输出模式*/
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);    
 	/* Configure USART3 Rx (PB.11) as input floating 浮点输入模式*/
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
@@ -175,7 +170,69 @@ void USART3_Init(void)
 	USART_Cmd(USART3, ENABLE);
 }
 
-
-
-
+void USART3_IRQHandler(void)          	
+{
+	if(USART_GetITStatus(USART3,USART_IT_RXNE)==SET)
+	{
+		uint8_t RxData = USART_ReceiveData(USART3);
+		num_c++;
+		//数据帧格式
+		if(RxState == 0)//第一个包头
+		{
+			if(RxData == '@' && Serial_RxFlag == 0)
+			{
+				RxState=1;
+			}
+		}
+		else if(RxState == 0 )
+		{
+			if(RxData == 'x' )//第二个包头
+			{
+				RxState=2;
+				RxState_Flag=1;
+			}
+			else if(RxData == 'y')
+			{
+				RxState=2;
+				RxState_Flag=2;
+			}		
+		}
+		else if(RxState == 2)
+		{
+			if(RxData == '-')//第三个包头
+			{
+				RxState=3;
+				Sign_Flag=1;
+			}
+			else if(RxData == '+')
+			{
+				RxState=3;
+				Sign_Flag=2;
+			}				
+		}
+		else if(RxState==3)
+		{
+			if(RxData == '\r')//第一个包尾
+			{
+				RxState=4;
+			}
+			else//连续接收数据
+			{
+				Serial_RxPacket[pRxState]=RxData;
+				pRxState++;	
+			}
+		}
+		else if(RxState==4)//第二个包尾
+		{
+			if (RxData=='\n')
+			{
+				RxState = 0;
+				Serial_RxFlag=1;
+				Serial_RxPacket[pRxState]='\0';//字符串结束时加上\0,表示字符串的结束
+				printf("RxState:%d\r\n",(unsigned int)RxState);
+			}
+		}
+		USART_ClearITPendingBit(USART3,USART_IT_RXNE);
+	}
+} 
 

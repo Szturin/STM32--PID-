@@ -2,7 +2,7 @@
  * 文件名  ：usart1.c
  * 描述    ：将printf函数重定向到USART1。这样就可以用printf函数将单片机的数据
  *           打印到PC上的超级终端或串口调试助手。         
- * 实验平台亚博智能开发板
+ * 实验平台?y亚博智能开发板
  * 硬件连接：------------------------
  *          | PA9  - USART1(Tx)      |
  *          | PA10 - USART1(Rx)      |
@@ -13,7 +13,6 @@
 #include "misc.h"
 //串口接收DMA缓存
 uint8_t Uart_Rx[UART_RX_LEN] = {0};
-uint8_t bluetooth;
 extern float Velocity_calcu;
 extern float Yaw_setting;
 /*
@@ -321,28 +320,4 @@ void PrintUart3(char *s)
 	}
 }
 
-void USART3_IRQHandler(void)          	
-{
-	if(USART_GetITStatus(USART3,USART_IT_RXNE) != RESET)
-	{
-		bluetooth = USART_ReceiveData(USART3); //通过串口2接收数据   	
-		
-		//【2.调前后跑】
-		if(bluetooth=='W') {Velocity_calcu=10;}
-		if(bluetooth=='S') {Velocity_calcu=-10;}
-		if(bluetooth=='Q') {Velocity_calcu=0;Yaw_setting=0;}//复位
-		
-		if(bluetooth=='A')
-		{
-			Yaw_setting+=10.0;
-			if(Yaw_setting>=160.0){Yaw_setting=160.0;}
-		}
-		
-		if(bluetooth=='D')
-		{
-			Yaw_setting-=10.0;
-			if(Yaw_setting<=-160.0){Yaw_setting=-160.0;}
-		}
-  } 
-} 
  

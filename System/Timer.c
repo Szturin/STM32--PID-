@@ -30,13 +30,3 @@ void TIM1_Init(u16 arr,u16 psc)
 	TIM_Cmd(TIM1, ENABLE); 
 }
 
-void TIM4_IRQHandler(void)
-{ 		    		  			    
-	u16 tsr;
-	tsr=TIM4->SR;	
-	if(tsr&0X0001)//溢出中断
-	{
-																				
-	}				   
-	TIM4->SR&=~(1<<0);//清除中断标志位 	 
-}

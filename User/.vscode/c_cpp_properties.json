@@ -3,13 +3,11 @@
         {
             "name": "Turin",
             "includePath": [
-                "d:\\5_stm32_project\\0-1 平衡车项目实战\\Driver",
-                "d:\\5_stm32_project\\0-1 平衡车项目实战\\Library",
-                "d:\\5_stm32_project\\0-1 平衡车项目实战\\Start",
-                "d:\\5_stm32_project\\0-1 平衡车项目实战\\User",
-                "d:\\5_stm32_project\\0-1 平衡车项目实战\\System",
-                "d:\\5_stm32_project\\0-1 平衡车项目实战\\Driver\\MPU6050",
-                "d:\\5_stm32_project\\0-1 平衡车项目实战\\Driver\\MPU6050_DMP",
+                "d:\\5_stm32_project\\2-3 stm32工程模板3.0\\Driver",
+                "d:\\5_stm32_project\\2-3 stm32工程模板3.0\\Library",
+                "d:\\5_stm32_project\\2-3 stm32工程模板3.0\\Start",
+                "d:\\5_stm32_project\\2-3 stm32工程模板3.0\\User",
+                "d:\\5_stm32_project\\2-3 stm32工程模板3.0\\System",
                 "D:\\keil5\\ARM\\ARMCC\\include",
                 "D:\\keil5\\ARM\\ARMCC\\include\\rw"
             ],

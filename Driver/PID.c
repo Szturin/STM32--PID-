@@ -2,7 +2,8 @@
 #include "PID.h"
 
 const float midvalue = 0;//6.5
-
+float filt_velocity=0;
+float last_filt_velocity=0;
 typedef struct 
 {
 	float Kp;
@@ -23,22 +24,30 @@ PID Turn;
 
 void Vertical_PID_Init()
 {
-	Vertical.Kp=-600;//1000*0.6 //780
+	//Vertical.Kp=-600;//1000*0.6 //780
+	//Vertical.Ki=0;
+	//Vertical.Kd=-7200;//12000*0.6 //3200
+	Vertical.Kp=-900*1.1*0.6;//1000*0.6 //780
 	Vertical.Ki=0;
-	Vertical.Kd=-7200;//12000*0.6 //3200
+	Vertical.Kd=-7500*1.8*0.6;//12000*0.6 //3200
 }
 
 void Velociy_PID_Init()
 {
+	//Velocity.Kp=240;
+	//Velocity.Ki=1.2;
+	//Velocity.Kd=0;
 	Velocity.Kp=240;
 	Velocity.Ki=1.2;
-	Velocity.Kd=0;
-	
+	Velocity.Kd=0;	
 }
 
 void Turn_PID_Init()
 {
-	Turn.Kp=-60;
+	//Turn.Kp=-60;
+	//Turn.Ki=0;
+	//Turn.Kd=-10;
+	Turn.Kp=-80;
 	Turn.Ki=0;
 	Turn.Kd=0;
 }
@@ -92,23 +101,20 @@ float Vertical_PID(float Pitch)
 float Velocity_PID(float velocity,float velocity_calcu)
 {
 	float a = 0.3;
-	
-	static float filt_velocity=0;
-	static float last_filt_velocity=0;
-	
-	Velocity.error = filt_velocity - velocity_calcu;//误差值
-	filt_velocity = a*velocity+(1-a)*last_filt_velocity;
+	Velocity.error = velocity - velocity_calcu;//误差值
+	filt_velocity = a*Velocity.error+(1-a)*last_filt_velocity;
+	Velocity.error_sum += filt_velocity ;//误差累加
 	I_amplitude_limiting(3000,&Velocity.error_sum);
-	Velocity.error_sum += Velocity.error;//误差累加
 	last_filt_velocity = filt_velocity;
 	
-	return Velocity.Kp*Velocity.error + Velocity.Ki*Velocity.error_sum;//PID控制器响应结果  
+	return Velocity.Kp*filt_velocity + Velocity.Ki*Velocity.error_sum;//PID控制器响应结果  
 }
 
 float Turn_PID(float yaw,float yaw_calcu)
 {
 	Turn.error= yaw - yaw_calcu;
-	
-	return Turn.Kp*Turn.error;
+	Turn.error_difference=Turn.error-Turn.last_error;
+	Turn.last_error = Turn.error;
+	return Turn.Kp*Turn.error+Turn.Kd*Turn.error_difference;
 }
 

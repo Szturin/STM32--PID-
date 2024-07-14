@@ -34,12 +34,7 @@
 .\objects\main.o: ..\Driver\OLED_Data.h
 .\objects\main.o: ..\Driver\Encoder.h
 .\objects\main.o: ..\System\Timer.h
-.\objects\main.o: ..\Driver\Motor.h
+.\objects\main.o: ..\Driver\Servo.h
 .\objects\main.o: ..\Driver\Key.h
 .\objects\main.o: ..\Driver\PWM.H
 .\objects\main.o: ..\Driver\Serial.H
-.\objects\main.o: ..\Driver\MPU6050\MPU6050.H
-.\objects\main.o: ..\Driver\MPU6050_DMP\inv_mpu.h
-.\objects\main.o: ..\Driver\PID.h
-.\objects\main.o: ..\Driver\MPU6050\I2C_.h
-.\objects\main.o: ..\Driver\usart.h

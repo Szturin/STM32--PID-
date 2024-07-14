@@ -52,7 +52,7 @@
           <OutputName>Project</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>0</CreateHexFile>
+          <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\Listings\</ListingPath>
@@ -133,12 +133,12 @@
             <UseExternalTool>0</UseExternalTool>
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
-            <Capability>0</Capability>
-            <DriverSelection>-1</DriverSelection>
+            <Capability>1</Capability>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Driver;..\Library;..\Start;..\User;..\System;..\Driver\MPU6050;..\Driver\MPU6050_DMP</IncludePath>
+              <IncludePath>..\Driver;..\Library;..\Start;..\User;..\System</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -581,16 +581,6 @@
               <FilePath>..\Driver\Key.h</FilePath>
             </File>
             <File>
-              <FileName>Motor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Driver\Motor.c</FilePath>
-            </File>
-            <File>
-              <FileName>Motor.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\Motor.h</FilePath>
-            </File>
-            <File>
               <FileName>OLED.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Driver\OLED.c</FilePath>
@@ -626,26 +616,6 @@
               <FilePath>..\Driver\Serial.h</FilePath>
             </File>
             <File>
-              <FileName>PID.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Driver\PID.c</FilePath>
-            </File>
-            <File>
-              <FileName>PID.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\PID.h</FilePath>
-            </File>
-            <File>
-              <FileName>usart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\usart.h</FilePath>
-            </File>
-            <File>
-              <FileName>usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Driver\usart.c</FilePath>
-            </File>
-            <File>
               <FileName>OLED_Data.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Driver\OLED_Data.c</FilePath>
@@ -655,80 +625,15 @@
               <FileType>5</FileType>
               <FilePath>..\Driver\OLED_Data.h</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>MPU6050</GroupName>
-          <Files>
             <File>
-              <FileName>MPU6050.c</FileName>
+              <FileName>Servo.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Driver\MPU6050\MPU6050.c</FilePath>
+              <FilePath>..\Driver\Servo.c</FilePath>
             </File>
             <File>
-              <FileName>MPU6050.h</FileName>
+              <FileName>Servo.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\Driver\MPU6050\MPU6050.h</FilePath>
-            </File>
-            <File>
-              <FileName>MPU6050_Reg.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\MPU6050\MPU6050_Reg.h</FilePath>
-            </File>
-            <File>
-              <FileName>I2C_.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Driver\MPU6050\I2C_.c</FilePath>
-            </File>
-            <File>
-              <FileName>I2C_.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\MPU6050\I2C_.h</FilePath>
-            </File>
-            <File>
-              <FileName>MyIIC.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Driver\MPU6050\MyIIC.c</FilePath>
-            </File>
-            <File>
-              <FileName>MyIIC.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\MPU6050\MyIIC.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>MPU6050_DMP</GroupName>
-          <Files>
-            <File>
-              <FileName>dmpKey.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\MPU6050_DMP\dmpKey.h</FilePath>
-            </File>
-            <File>
-              <FileName>inv_mpu.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Driver\MPU6050_DMP\inv_mpu.c</FilePath>
-            </File>
-            <File>
-              <FileName>dmpmap.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\MPU6050_DMP\dmpmap.h</FilePath>
-            </File>
-            <File>
-              <FileName>inv_mpu_dmp_motion_driver.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Driver\MPU6050_DMP\inv_mpu_dmp_motion_driver.c</FilePath>
-            </File>
-            <File>
-              <FileName>inv_mpu.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\MPU6050_DMP\inv_mpu.h</FilePath>
-            </File>
-            <File>
-              <FileName>inv_mpu_dmp_motion_driver.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Driver\MPU6050_DMP\inv_mpu_dmp_motion_driver.h</FilePath>
+              <FilePath>..\Driver\Servo.h</FilePath>
             </File>
           </Files>
         </Group>
